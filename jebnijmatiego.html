@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Mati Fight</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #fff;
+      font-family: sans-serif;
+    }
+
+    #topSpacer { height: 50px; }
+
+    #container {
+      position: relative;
+      display: inline-block;
+      margin-top: 20px;
+    }
+
+    #baseImage {
+      display: block;
+      width: 300px;
+      height: auto;
+      z-index: 1;
+    }
+
+    .action-img {
+      position: absolute;
+      pointer-events: none;
+      display: none;
+      transform-origin: center center;
+      z-index: 2;
+    }
+
+    @keyframes fly-punch {
+      0% { top: 100%; left: 100%; transform: translate(0,0) scale(0.4); opacity: 1; }
+      50% { top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+      60% { transform: translate(-50%, -50%) scale(1.2); }
+      80% { top: 100%; left: 100%; transform: translate(0,0) scale(0.5); opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes fly-kick {
+      0% { top: 100%; left: 0%; transform: translate(0,0) scale(0.4); opacity: 1; }
+      50% { top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+      60% { transform: translate(-50%, -50%) scale(1.2); }
+      80% { top: 100%; left: 0%; transform: translate(0,0) scale(0.5); opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes shake {
+      0% { transform: translate(0,0) rotate(0deg); }
+      25% { transform: translate(-5px,5px) rotate(-5deg); }
+      50% { transform: translate(5px,-5px) rotate(5deg); }
+      75% { transform: translate(-5px,5px) rotate(-5deg); }
+      100% { transform: translate(0,0) rotate(0deg); }
+    }
+
+    @keyframes fly-star {
+      0% { transform: translate(0,0) scale(0); opacity: 1; }
+      50% { transform: translate(0,-30px) scale(1); opacity: 1; }
+      100% { transform: translate(0,-50px) scale(0); opacity: 0; }
+    }
+
+    .btn-container { margin-top: 30px; }
+
+    .btn-container button {
+      margin: 0 5px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #hitCounter {
+      margin-top: 15px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="topSpacer"></div>
+
+  <div id="container">
+    <img id="baseImage" src="mati_serduszka.png" alt="Mati">
+    <img id="punch" class="action-img" src="raczka.png" alt="Uderzenie">
+    <img id="kick" class="action-img" src="kop.png" alt="Kopnięcie">
+  </div>
+
+  <div class="btn-container">
+    <button id="btnKick">Kopnij</button>
+    <button id="btnPunch">Uderz</button>
+  </div>
+
+  <div id="hitCounter">Mati został trafiony: 0 razy</div>
+
+  <audio id="soundPunch" src="punch.mp3"></audio>
+  <audio id="soundKick"  src="kick.mp3"></audio>
+
+  <script>
+    const punch = document.getElementById('punch');
+    const kick  = document.getElementById('kick');
+    const btnPunch = document.getElementById('btnPunch');
+    const btnKick  = document.getElementById('btnKick');
+    const base = document.getElementById('baseImage');
+    const hitCounter = document.getElementById('hitCounter');
+    const soundPunch = document.getElementById('soundPunch');
+    const soundKick = document.getElementById('soundKick');
+
+    let hits = 0;
+
+    function doAction(img, animName, sound=null) {
+      if(sound) sound.play();
+      img.style.display = 'block';
+      img.style.animation = animName + ' 0.9s ease-out forwards';
+      img.addEventListener('animationend', () => {
+        img.style.display = 'none';
+      }, { once: true });
+    }
+
+    function shakeBase() {
+      base.style.animation = 'shake 0.3s';
+      base.addEventListener('animationend', () => base.style.animation = '', { once: true });
+    }
+
+    function hitMati() {
+      hits++;
+      hitCounter.textContent = `Mati został trafiony: ${hits} razy`;
+    }
+
+    function showStars(numStars = 5) {
+      for(let i = 0; i < numStars; i++) {
+        const star = document.createElement('img');
+        star.src = 'gwiazda.png';
+        star.className = 'action-img';
+        star.style.width = '20px';
+        star.style.height = '20px';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 50 + '%';
+        star.style.display = 'block';
+        star.style.zIndex = 3;
+        star.style.animation = 'fly-star 0.8s ease-out forwards';
+        document.getElementById('container').appendChild(star);
+
+        star.addEventListener('animationend', () => {
+          star.remove();
+        });
+      }
+    }
+
+    btnPunch.addEventListener('click', () => {
+      shakeBase();
+      doAction(punch, 'fly-punch', soundPunch);
+      showStars();
+      hitMati();
+    });
+
+    btnKick.addEventListener('click', () => {
+      shakeBase();
+      doAction(kick, 'fly-kick', soundKick);
+      showStars();
+      hitMati();
+    });
+  </script>
+
+</body>
+</html>
